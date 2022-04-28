@@ -85,16 +85,17 @@ def get_title(f0):
 
 if __name__ == "__main__":
     os.chdir("series")
-    f0 = "2400_4800_0.350_1.500_1.0_243001_0.1_0.dat"
+    f0 = "1200_160_0.300_1.200_1.0_4001_0.1_0.dat"
 
     t, phi, theta = read_order_para(f0)
     # theta = untangle(theta)
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, constrained_layout=True)
     ax1.plot(t, phi)
-    ax2.plot(t, theta/np.pi, ".", ms=0.5)
+    ax2.plot(t, theta/np.pi, "-", ms=0.5)
     ax1.set_ylabel(r"$m$")
     ax2.set_ylabel(r"$\theta_m/\pi$")
     ax2.set_xlabel(r"$t$")
+    ax1.set_xlim(2.55e8, 2.6e8)
     plt.suptitle(get_title(f0))
     plt.show()
     plt.close()

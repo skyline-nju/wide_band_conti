@@ -233,54 +233,63 @@ def create_band_lane_snap():
 
 
 if __name__ == "__main__":
-    fin = r"snap/built/s1200_5120_0.300_1.600_1.0_184001_0.1_00000000.bin"
-    # fin = r"snap/s1200_1280_0.300_2.000_1.0_1001_0.1_05410000.bin"
+    # fin = r"snap/built/s4800_640_0.300_3.500_1.0_2004_0.1_00000000.bin"
+    fin = r"snap/s2400_320_0.300_1.094_1.0_4001_0.1_01460000.bin"
+
+    # duplicate(fin, 1, 2)
 
     x, y, theta = read_snap(fin)
     para = get_para(fin)
     print(x.size, para["Lx"] * para["Ly"] * para["rho0"])
-    plot_snap(x, y, theta, para, frac=0.005)
+    plot_snap(x, y, theta, para, frac=0.05)
 
-    # mask = y < 20
-    # x = np.hstack((x, x[mask]))
-    # y = np.hstack((y, y[mask]+300))
-    # theta = np.hstack((theta, theta[mask]))
-    # para["Ly"] = 320
+    # x += 100
+    # x[x>=1200] -= 1200
+    # plot_snap(x, y, theta, para, frac=0.05)
+
+    # mask = x >= 600
+    # xg, yg, theta_g = x[mask], y[mask], theta[mask]
+    # x = np.hstack((x, xg + 600, xg + 1200))
+    # y = np.hstack((y, yg, yg))
+    # theta = np.hstack((theta, theta_g, theta_g))
+    # para["Lx"] = 2400 
     # para["t"] = 0
+    # print("new rho0=", x.size / (para["Lx"] * para["Ly"]))
+    # para["rho0"] = 0.994
     # plot_snap(x, y, theta, para, frac=0.05)
 
     # x -= 180
     # x[x < 0] += 1200
     # plot_snap(x, y, theta, para, frac=0.005)
 
-    # mask = x >= 1200
-    # xg = x[mask]
-    # yg = y[mask]
-    # theta_g = theta[mask]
+    # mask = x >= 600
+    # xl = x[mask]
+    # yl = y[mask]
+    # theta_l = theta[mask]
 
-    # x = np.hstack((x, xg + 1200))
-    # y = np.hstack((y, yg))
-    # theta = np.hstack((theta, theta_g))
-    # para["Lx"] = 3600
-    # # para["rho0"] = x.size / (para["Lx"] * para["Ly"])
+    # x = np.hstack((x, xl + 600, xl + 1200, xl + 1800))
+    # y = np.hstack((y, yl, yl, yl,))
+    # theta = np.hstack((theta, theta_l, theta_l, theta_l))
+    # para["Lx"] = 2400
     # para["rho0"] = 0.923
     # para["seed"] = 384001
     # para["t"] = 0
     # plot_snap(x, y, theta, para, frac=0.005)
 
-    x = np.hstack((x, x))
-    y = np.hstack((y, y+5120))
-    theta = np.hstack((theta, theta))
-
-    para["t"] = 0
-    para["seed"] = 1164001
-    para["Ly"] = 5120 * 2
-    # # para["rho0"] = 0.8
-    plot_snap(x, y, theta, para, frac=0.005)
+    # x = np.hstack((x, x + 2400))
+    # y = np.hstack((y, y))
+    # theta = np.hstack((theta, theta))
 
     # para["t"] = 0
-    # para["rho0"] = 2.2
-    # # para["seed"] = 1001
-    # plot_snap(x, y, theta, para, frac=0.005)
+    # para["seed"] = 2004
+    # para["Lx"] = 2400 * 2
+    # # # para["rho0"] = 0.8
+    # plot_snap(x, y, theta, para, frac=0.02)
+
+    para["t"] = 0
+    para["rho0"] = 1.194
+    para["seed"] = 4001
+    plot_snap(x, y, theta, para, frac=0.02)
 
     save_to_file(x, y, theta, para)
+

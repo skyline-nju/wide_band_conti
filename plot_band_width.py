@@ -8,12 +8,14 @@ if __name__ == "__main__":
     ])
     width = np.array(
         [10, 12, 15, 34, 65, 75, 125, 140, 140, 190, 250, 270, 310, 370]) * 2
-    plt.plot(D, width, "o")
+    plt.plot(D, width, "o", label=r"$L_x=1200$")
     # plt.xscale("log")
     # plt.yscale("log")
+    plt.plot([0.35], [800], "s", label=r"$L_x=2400$")
     plt.xlabel(r"$D$", fontsize="x-large")
     plt.ylabel("max width for a single band", fontsize="x-large")
-    plt.title(r"$L_x=1200, L_y=300$", fontsize="x-large")
+    plt.legend(fontsize="x-large")
+    plt.title(r"$L_y=300$", fontsize="x-large")
     plt.tight_layout()
     # plt.show()
     plt.savefig("band_width.pdf")

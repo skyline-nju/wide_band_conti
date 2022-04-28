@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import glob
-# import sys
+import sys
 from matplotlib.colors import hsv_to_rgb
 from read_fields import get_para, read_fields
 
@@ -192,7 +192,9 @@ def plot_density(rho, t, para, figsize, fout=None):
     fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
     box = [0, para["Lx"], 0, para["Ly"]]
 
-    if para["rho0"] <= 1.2:
+    if para["rho0"] <= 0.8:
+        vmin, vmax = None, 4
+    elif para["rho0"] <= 1.5:
         vmin, vmax = None, 6
     elif para["rho0"] >= 3:
         vmin, vmax = None, 10
@@ -202,8 +204,6 @@ def plot_density(rho, t, para, figsize, fout=None):
     if para["Ly"] > para["Lx"]:
         ax.yaxis.set_tick_params(rotation=90)
 
-    if para["Lx"] == 1200:
-        ax.set_xticks([0, 400, 800, 1200])
     title = r"$t=%g$" % (t * para["h"])
     plt.suptitle(title, fontsize="x-large")
     if fout is None:
@@ -215,7 +215,43 @@ def plot_density(rho, t, para, figsize, fout=None):
     plt.close()
 
 
-def plot_momentum(rho, vx, vy, t, para, figsize=(12, 7.5), fout=None):
+def plot_momentum(vx, vy, t, para, figsize, fout=None):
+    theta = np.arctan2(vy, vx)
+    theta[theta < 0] += np.pi * 2
+    theta *= 180 / np.pi
+    module = np.sqrt(vx**2 + vy**2)
+    fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
+    box = [0, para["Lx"], 0, para["Ly"]]
+    if para["rho0"] >= 1.5:
+        vmax = 4
+    elif para["rho0"] >= 1:
+        vmax = 4
+    elif para["rho0"] > 0.55:
+        vmax = 3
+    else:
+        vmax = 2
+    RGB = map_v_to_rgb(theta, module, m_max=vmax)
+    ax.imshow(RGB, extent=box, origin="lower")
+    if para["Lx"] / para["Ly"] <= 3:
+        ax.yaxis.set_tick_params(rotation=90)
+    title = r"$t=%g$" % (t * para["h"])
+    plt.suptitle(title, fontsize="x-large")
+    if fout is None:
+        plt.show()
+    else:
+        plt.savefig(fout)
+        # plt.show()
+        print(f"save frame at t={t}")
+    plt.close()
+
+
+def plot_momentum_w_colobar(rho,
+                            vx,
+                            vy,
+                            t,
+                            para,
+                            figsize=(12, 7.5),
+                            fout=None):
     theta = np.arctan2(vy, vx)
     theta[theta < 0] += np.pi * 2
     theta *= 180 / np.pi
@@ -262,46 +298,9 @@ def plot_momentum(rho, vx, vy, t, para, figsize=(12, 7.5), fout=None):
         bbox[2] = 0.08
         bbox[1] += 0.05
         bbox[3] = bbox[3] - bbox[1] - 0.1
-        show_cb = True
-    elif para["Lx"] == 1200 and para["Ly"] == 640:
-        plt.tight_layout(rect=[-0.03, -0.06, 1.03, 0.96])
-        title = r"$t=%g$" % (t * para["h"])
-        plt.suptitle(title, y=0.999, fontsize="xx-large", wrap=True)
-        show_cb = False
-    elif para["Lx"] == 1200 and para["Ly"] == 320:
-        plt.tight_layout(rect=[-0.06, -0.06, 1.00, 0.96])
-        title = r"$t=%g$" % (t * para["h"])
-        ax.set_xticks([0, 400, 800, 1200])
-        ax.set_yticks([0, 160, 320])
-        plt.suptitle(title, y=0.999, fontsize="x-large", wrap=True)
-        show_cb = False
-    elif para["Lx"] == 1200 and para["Ly"] == 160:
-        plt.tight_layout(rect=[-0.06, -0.06, 1.00, 0.96])
-        title = r"$t=%g$" % (t * para["h"])
-        plt.suptitle(title, y=0.999, fontsize="x-large", wrap=True)
-        show_cb = False
-    elif para["Lx"] == 1200 and para["Ly"] == 1280:
-        plt.tight_layout(rect=[-0.03, -0.03, 1.03, 0.98])
-        title = r"$t=%g$" % (t * para["h"])
-        plt.suptitle(title, y=0.999, fontsize="xx-large", wrap=True)
-        show_cb = False
-    elif para["Lx"] == 9600 and para["Ly"] == 1280:
-        show_cb = False
-        ax.set_ylabel(r"$t=%g$" % (t * para["h"]))
-        ax.set_yticks([0, 400, 800, 1200])
-        plt.tight_layout(rect=[-0.01, -0.04, 1.01, 1.04])
-    elif para["Lx"] == para["Ly"] * 2:
-        show_cb = False
-        ax.set_ylabel(r"$t=%g$" % (t * para["h"]))
-        plt.tight_layout(rect=[-0.02, -0.04, 1.02, 1.04])
-    else:
-        plt.tight_layout(rect=[-0.01, -0.05, 1.01, 0.96])
-        title = r"$t=%g$" % (t * para["h"])
-        plt.suptitle(title, y=0.999, fontsize="x-large", wrap=True)
-        show_cb = False
-    if show_cb:
-        cb_ax = fig.add_axes(bbox)
-        add_colorbar(cb_ax, vmin, vmax, 0, 360, "v")
+
+    cb_ax = fig.add_axes(bbox)
+    add_colorbar(cb_ax, vmin, vmax, 0, 360, "v")
 
     if fout is None:
         plt.show()
@@ -311,90 +310,63 @@ def plot_momentum(rho, vx, vy, t, para, figsize=(12, 7.5), fout=None):
     plt.close()
 
 
-def plot_frames(f0, save_fig=True, fmt="jpg", which="momentum"):
+def set_figsize(Lx, Ly, which, with_color_bar=False):
+    if not with_color_bar:
+        if which == "both":
+            figsize = {
+                (1200, 1280): (6, 3),
+                (2400, 5120): (6, 5.8)
+            }
+        else:
+            figsize = {
+                (1200, 160): (3.75, 1.05),
+                (1200, 320): (3.75, 1.5),
+                (1200, 640): (3.75, 2.25),
+                (1200, 1280): (3.75, 3.75),
+                (1200, 5120): (1.6, 6),
+                (1200, 10240): (1.85, 11.6),
+                (2400, 640): (3, 1.2),
+                (2400, 1280): (3, 2),
+                (2400, 4800): (2, 3.8),
+                (2400, 5120): (3, 5.8),
+                (2400, 10240): (3, 11),
+                (2400, 20480): (3, 22),
+                (3600, 5120): (4, 5.8),
+                (4800, 300): (4, 0.75),
+                (4800, 600): (4, 1),
+                (4800, 640): (4, 1),
+                (9600, 300): (8, 0.75),
+                (9600, 600): (8, 1),
+                (9600, 1280): (8, 1.3)
+            }
+        if (Lx, Ly) in figsize:
+            return figsize[(Lx, Ly)]
+        else:
+            print("Error, unknown figsize for Lx=%g, Ly=%g" % (Lx, Ly))
+            sys.exit()
+    else:
+        if Lx == Ly:
+            if which == "both":
+                figsize = (12, 7.5)
+            else:
+                figsize = (7, 6)
+        return figsize
+
+
+def plot_frames(f0, save_fig=True, fmt="jpg", which="momentum", w_cb=False):
     # para = get_para_field(f0)
     para = get_para(f0)
-    prefix = "D:/data/wide_band_conti"
+    prefix = "D:/tmp/wide_band_conti"
     # prefix = "imgs"
+    figsize = set_figsize(para["Lx"], para["Ly"], which, w_cb)
     if para["Lx"] == para["Ly"]:
         folder = "%s/%.1f_%g_%d_%.3f_%.3f_%d" % (prefix, para["v0"], para["h"],
                                                  para["Lx"], para["D"],
                                                  para["rho0"], para["seed"])
-        if which == "both":
-            figsize = (12, 7.5)
-        else:
-            figsize = (7, 6)
     else:
         folder = "%s/%.1f_%g_%d_%d_%.3f_%.3f_%d" % (
             prefix, para["v0"], para["h"], para["Lx"], para["Ly"], para["D"],
             para["rho0"], para["seed"])
-        if which == "both":
-            if para["Lx"] == 2400 and para["Ly"] == 5120:
-                figsize = (6, 5.8)
-            elif para["Lx"] == 1200 and para["Ly"] == 1280:
-                figsize = (6, 3)
-            if 3.5 < para["Lx"] / para["Ly"] <= 4:
-                figsize = (12, 6)
-            elif para["Lx"] // para["Ly"] == 2:
-                figsize = (12, 10)
-            elif para["Lx"] // para["Ly"] == 8:
-                figsize = (12, 4)
-            elif para["Lx"] // para["Ly"] == 12:
-                figsize = (12, 3)
-            elif para["Lx"] // para["Ly"] == 16:
-                figsize = (16, 3)
-            elif para["Lx"] // para["Ly"] == 24:
-                figsize = (24, 3)
-            elif para["Lx"] // para["Ly"] == 32:
-                figsize = (32, 3)
-            elif para["Ly"] // para["Lx"] == 2:
-                figsize = (10, 8)
-            elif para["Ly"] // para["Lx"] == 4:
-                figsize = (4, 7.6)
-
-        else:
-            if para["Lx"] == 1200 and para["Ly"] == 640:
-                figsize = (2.5, 1.5)
-            elif para["Lx"] == 1200 and para["Ly"] == 320:
-                figsize = (2.5, 1.0)
-            elif para["Lx"] == 1200 and para["Ly"] == 160:
-                figsize = (2.5, 0.7)
-            elif para["Lx"] == 1200 and para["Ly"] == 1280:
-                figsize = (2.5, 2.5)
-            elif para["Lx"] == 1200 and para["Ly"] == 5120:
-                figsize = (1.85, 5.8)
-            elif para["Lx"] == 1200 and para["Ly"] == 10240:
-                figsize = (1.85, 11.6)
-            elif para["Lx"] == 2400 and para["Ly"] == 5120:
-                figsize = (3, 5.8)
-            elif para["Lx"] == 2400 and para["Ly"] == 9600:
-                figsize = (2, 7)
-            elif para["Lx"] == 2400 and para["Ly"] == 4800:
-                figsize = (2, 3.8)
-            elif para["Lx"] == 3600 and para["Ly"] == 5120:
-                figsize = (4.0, 5.8)
-            elif para["Lx"] == 9600 and para["Ly"] == 1280:
-                figsize = (8, 1.3)
-            elif para["Lx"] == 9600 and para["Ly"] == 600:
-                figsize = (8, 1)
-            elif para["Lx"] == 9600 and para["Ly"] == 300:
-                figsize = (8, 0.75)
-            elif para["Lx"] == 4800 and para["Ly"] == 300:
-                figsize = (4, 0.75)
-            elif para["Lx"] == 4800 and para["Ly"] == 600:
-                figsize = (4, 1)
-            elif para["Lx"] // para["Ly"] == 4:
-                figsize = (2.5, 0.92)
-            elif para["Lx"] // para["Ly"] == 8:
-                figsize = (12, 2)
-            elif para["Lx"] // para["Ly"] == 2:
-                figsize = (5, 2.5)
-                if para["Ly"] == 3600 and para["Lx"] == 9600:
-                    figsize = (8, 3.2)
-            elif para["Ly"] == 2 * para["Lx"]:
-                figsize = (5, 6)
-            else:
-                figsize = (8, 4.2)
     if not os.path.exists(folder):
         os.mkdir(folder)
     existed_snap = glob.glob("%s/t=*.%s" % (folder, fmt))
@@ -408,18 +380,18 @@ def plot_frames(f0, save_fig=True, fmt="jpg", which="momentum"):
         if which == "both":
             plot_density_momentum(rho, vx, vy, t, para, figsize, fout)
         elif which == "momentum":
-            plot_momentum(rho, vx, vy, t, para, figsize, fout)
+            plot_momentum(vx, vy, t, para, figsize, fout)
         elif which == "density":
             plot_density(rho, t, para, figsize, fout)
 
 
-def plot_all_fields_series(pat="*_0.bin", fmt="jpg"):
+def plot_all_fields_series(pat="*_0.bin", fmt="jpg", which="density"):
     f0_list = glob.glob(f"fields/{pat}")
     for f0 in f0_list:
         print(f0)
-        plot_frames(f0, True, fmt=fmt, which="momentum")
+        plot_frames(f0, save_fig=True, fmt=fmt, which=which)
 
 
 if __name__ == "__main__":
-    pat = "2400_*_4.000_1.0_*_4_10000_0.1_*.bin"
-    plot_all_fields_series(pat, fmt="jpg")
+    pat = "4800_640_0.300_3.??0_1.0_2004_4_10000_0.1_0.bin"
+    plot_all_fields_series(pat, fmt="jpg", which="momentum")

@@ -180,8 +180,8 @@ def plot_snap(x=None,
 
 
 if __name__ == "__main__":
-    fin = r"snap/s1200_1280_0.300_2.000_1.0_1001_0.1_05060000.bin"
+    fin = r"snap/s2400_320_0.300_0.994_1.0_4001_0.1_02130000.bin"
     x, y, theta = read_snap(fin)
     para = get_para(fin)
     print(x.size, para["Lx"] * para["Ly"] * para["rho0"])
-    plot_snap(x, y, theta, para, frac=0.01)
+    plot_snap(x, y, theta, para, frac=0.02)
