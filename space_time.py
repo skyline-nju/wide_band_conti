@@ -121,14 +121,14 @@ def get_x_averaged_fields(fin):
 
 
 if __name__ == "__main__":
-    # fin = "fields/1200_640_0.300_3.400_1.0_2001_2_10000_0.1_0.bin"
-    # get_y_averaged_fields(fin)
+    fin = "fields/2400_320_0.300_0.994_1.0_4001_4_10000_0.1_0.bin"
+    get_y_averaged_fields(fin)
 
     # fin = "fields/1200_10240_0.300_1.600_1.0_1164001_4_10000_0.1_0.bin"
     # get_x_averaged_fields(fin)
 
-    fin = "transverse_profiles/1200_10240_0.300_1.600_1.0_1164001.npz"
-    t, y, rho_y, mx_y, my_y = read_x_averaged_fields(fin)
-    plt.imshow(rho_y-1.6, origin="lower", cmap="bwr", aspect="auto")
-    plt.show()
-    plt.close()
+    # fin = "transverse_profiles/1200_10240_0.300_1.600_1.0_1164001.npz"
+    # t, y, rho_y, mx_y, my_y = read_x_averaged_fields(fin)
+    # plt.imshow(rho_y-1.6, origin="lower", cmap="bwr", aspect="auto")
+    # plt.show()
+    # plt.close()

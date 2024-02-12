@@ -2,6 +2,7 @@ import numpy as np
 import os
 from plot_snap import read_snap, plot_snap, get_para
 
+root_tahmineh = "/run/user/1148/gvfs/sftp:host=tahmineh002,user=yduan/scratch03.local/yduan"
 
 def save_to_file(x, y, theta, para, adjust_rho0=False):
     n_new = int(para["rho0"] * para["Lx"] * para["Ly"])
@@ -233,15 +234,16 @@ def create_band_lane_snap():
 
 
 if __name__ == "__main__":
-    # fin = r"snap/built/s4800_640_0.300_3.500_1.0_2004_0.1_00000000.bin"
-    fin = r"snap/s2400_320_0.300_1.094_1.0_4001_0.1_01460000.bin"
+    fin = r"snap/s1200_320_0.200_0.275_1.0_1001_0.1_02670000.bin"
+    # prefix = f"{root_tahmineh}/wide_band/1200_320/last"
+    # fin = f"{prefix}/s1200_320_0.200_0.260_1.0_4001_0.1_00000000.bin"
 
-    # duplicate(fin, 1, 2)
+    duplicate(fin, 1, 16)
 
-    x, y, theta = read_snap(fin)
-    para = get_para(fin)
-    print(x.size, para["Lx"] * para["Ly"] * para["rho0"])
-    plot_snap(x, y, theta, para, frac=0.05)
+    # x, y, theta = read_snap(fin)
+    # para = get_para(fin)
+    # print(x.size, para["Lx"] * para["Ly"] * para["rho0"])
+    # plot_snap(x, y, theta, para, frac=0.05)
 
     # x += 100
     # x[x>=1200] -= 1200
@@ -286,10 +288,10 @@ if __name__ == "__main__":
     # # # para["rho0"] = 0.8
     # plot_snap(x, y, theta, para, frac=0.02)
 
-    para["t"] = 0
-    para["rho0"] = 1.194
-    para["seed"] = 4001
-    plot_snap(x, y, theta, para, frac=0.02)
+    # para["t"] = 0
+    # para["rho0"] = 0.265
+    # para["seed"] = 4001
+    # plot_snap(x, y, theta, para, frac=0.02)
 
-    save_to_file(x, y, theta, para)
+    # save_to_file(x, y, theta, para)
 

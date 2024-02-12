@@ -99,6 +99,30 @@ def varied_Ly(Lx=1200, Lys=[160, 320, 640], D=0.3, rho0=1.4, seed=4001):
     plt.close()
 
 
+def varied_Lx(Lxs=[1200, 2400], Ly=320, D=0.3, seed=4001):
+    fig, ax = plt.subplots(constrained_layout=True)
+    for Lx in Lxs:
+        if Lx == 1200:
+            rho0 = 1.4
+        else:
+            rho0 = 0.994
+        x, rho_m, mx_m, my_m = get_time_ave_profile(Lx, Ly, D, rho0, seed)
+        if Lx == 2400:
+            rho_m = np.roll(rho_m, 150)
+        # if Ly == 160:
+        #     x = Lx - x + 2
+        ax.plot(x, rho_m, label=r"$L_x=%d,\rho_0=%g$" % (Lx, rho0))
+    ax.set_xlim(0, Lxs[-1])
+    ax.set_xlabel(r"$x$", fontsize="xx-large")
+    ax.set_ylabel(r"$\langle\rho \rangle_{y,t}$", fontsize="xx-large")
+    plt.legend(fontsize="x-large")
+    plt.suptitle(r"$L_y=%d,D=%g$" % (Ly, D), fontsize="xx-large")
+    plt.show()
+    # fout = "space_time/time_ave/varied_Lx_Ly%d_D%g.pdf" % (Ly, D)
+    # plt.savefig(fout)
+    plt.close()
+
+
 def varied_rho0(Lx=1200, Ly=640, D=0.3, seed=4001):
     if Lx == 1200 and Ly == 640 and D == 0.3 and seed == 4001:
         rho0s = [0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8]
@@ -127,10 +151,94 @@ def varied_rho0(Lx=1200, Ly=640, D=0.3, seed=4001):
     plt.suptitle(r"$L_x=%d,L_y=%d, D=%g$" % (Lx, Ly, D),
                  fontsize="x-large")
     ax[0].legend(loc="upper left", fontsize="large")
-    # plt.show()
-    fout = "space_time/time_ave/varied_rho0_L%d_%d_D%g.pdf" % (Lx, Ly, D)
-    plt.savefig(fout)
+    plt.show()
+    # fout = "space_time/time_ave/varied_rho0_L%d_%d_D%g.pdf" % (Lx, Ly, D)
+    # plt.savefig(fout)
     plt.close()
+
+
+    for rho0 in rho0s:
+        x, rho_m, mx_m, my_m = get_time_ave_profile(Lx, Ly, D, rho0, seed)
+        plt.plot(-mx_m, rho_m + rho0, "o", ms=0.5)
+    plt.show()
+    plt.close()
+
+
+    # rho0s = [0.6, 0.8, 1.4, 1.6, 1.8, 3.5]
+    rho0s = [0.6, 1.8, 3.5]
+
+    for rho0 in rho0s:
+        if rho0 < 2:
+            seed = 4001
+        else:
+            seed = 2001
+        x, rho_m, mx_m, my_m = get_time_ave_profile(Lx, Ly, D, rho0, seed)
+        if seed == 2001:
+            rho_m = rho_m[::-1]
+            mx_m = mx_m[::-1]
+        mx_m_dot = -mx_m[1:] + mx_m[:-1]
+        rho_m_dot = rho_m[1:] - rho_m[:-1]
+        # plt.plot(-mx_m[1:], mx_m_dot)
+        plt.plot(rho_m[1:], rho_m_dot)
+    plt.plot(4, 0, "x", ms=10, c="k")
+    plt.plot(0.53, 0, "x", ms=10, c="k")
+    plt.axvline(4, linestyle="--", c="k")
+    plt.axvline(0.53, linestyle="--", c="k")
+
+    plt.axhline(0, linestyle="dashed", c="k")
+    plt.xlabel(r"$\rho$", fontsize="x-large")
+    plt.ylabel(r"$\dot{\rho}$", fontsize='x-large')
+    plt.tight_layout()
+    plt.show()
+    plt.close()
+
+
+def profiles_and_trajectories():
+    Lx = 1200
+    Ly = 640
+    fig, axes = plt.subplots(3, 3, figsize=(8, 6), sharex="col", sharey="col")
+    D = 0.3
+    rho0s = [0.6, 1.8, 3.5]
+    seed = [4001, 4001, 2001]
+    rho_g = [0.53, 0.58, 0.58]
+    rho_l = [4, 4, 4]
+
+    for i, rho0 in enumerate(rho0s):
+        x, rho_m, mx_m, my_m = get_time_ave_profile(Lx, Ly, D, rho0, seed[i])
+        if i == 2:
+            rho_m = rho_m[::-1]
+            mx_m = mx_m[::-1]
+        rho_m_dot = rho_m[1:] - rho_m[:-1]
+        axes[i, 0].plot(x, mx_m)
+        axes[i, 1].plot(x, rho_m)
+        axes[i, 2].plot(rho_m[1:], rho_m_dot)
+        axes[i, 0].set_ylabel(r"$m$")
+        axes[i, 1].set_ylabel(r"$\rho$")
+        axes[i, 2].set_ylabel(r"$\dot{\rho}$")
+        axes[i, 2].axhline(0, linestyle="dotted", c="tab:grey")
+        line_g = axes[i, 1].axhline(rho_g[i], color="tab:green", linestyle=":")
+        line_l = axes[i, 1].axhline(rho_l[i], color="tab:red", linestyle=":")
+        axes[i, 2].plot(0.53, 0, "x", color=line_g.get_c())
+        axes[i, 2].plot(4, 0, "x", color=line_l.get_c())
+    axes[2, 0].set_xlim(0, Lx)
+    axes[2, 1].set_xlim(0, Lx)
+    axes[2, 0].set_xlabel(r"$t$")
+    axes[2, 1].set_xlabel(r"$t$")
+    axes[2, 2].set_xlabel(r"$\rho$")
+    axes[2, 0].axhline(0, color="tab:green", linestyle=":")
+
+    fig.suptitle(r"$L_x=1200, L_y=160, D=0.3$")
+    fig.tight_layout(rect=[0.05, -0.025, 1.01, 1.02])
+
+    fig.text(0.02, 0.15, r"$\rho_0=3.5$", fontsize="x-large", rotation=90)
+    fig.text(0.02, 0.45, r"$\rho_0=1.8$", fontsize="x-large", rotation=90)
+    fig.text(0.02, 0.75, r"$\rho_0=0.6$", fontsize="x-large", rotation=90)
+
+    
+    plt.show()
+    # plt.savefig("profiles_traj.png", dpi=200)
+    plt.close()
+
 
 
 def inverse_bands():
@@ -165,22 +273,22 @@ def inverse_bands():
     plt.suptitle(r"$L_x=%d,L_y=%d, D=%g$" % (Lx, Ly, D),
                  fontsize="x-large")
     ax[0].legend(loc="lower left", fontsize="large")
-    # plt.show()
-    fout = "space_time/time_ave/inv_band_L%d_%d_D%g.pdf" % (Lx, Ly, D)
-    plt.savefig(fout)
+    plt.show()
+    # fout = "space_time/time_ave/inv_band_L%d_%d_D%g.pdf" % (Lx, Ly, D)
+    # plt.savefig(fout)
     plt.close()
 
 
 if __name__ == "__main__":
-    Lx = 1200
-    Ly = 640
+    Lx = 2400
+    Ly = 320
     D = 0.3
-    rho0 = 3.4
-    seed = 2001
+    rho0 = 0.994
+    seed = 4001
     rho_thresh = 2
-    dx = 2
+    dx = 4
 
-    # beg = 400
+    # beg = 150
     # end = None
     # cal_time_ave_profiles(Lx, Ly, D, rho0, seed, dx, beg=beg, end=end)
 
@@ -192,4 +300,7 @@ if __name__ == "__main__":
 
     # varied_Ly()
     # varied_rho0()
-    inverse_bands()
+    # inverse_bands()
+
+    # varied_Lx()
+    profiles_and_trajectories()

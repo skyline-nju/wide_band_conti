@@ -180,7 +180,7 @@ def plot_snap(x=None,
 
 
 if __name__ == "__main__":
-    fin = r"snap/s2400_320_0.300_0.994_1.0_4001_0.1_02130000.bin"
+    fin = r"snap/s1200_640_0.300_0.600_1.0_4001_0.1_30600000.bin"
     x, y, theta = read_snap(fin)
     para = get_para(fin)
     print(x.size, para["Lx"] * para["Ly"] * para["rho0"])

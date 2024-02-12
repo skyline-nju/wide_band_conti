@@ -325,6 +325,7 @@ def set_figsize(Lx, Ly, which, with_color_bar=False):
                 (1200, 1280): (3.75, 3.75),
                 (1200, 5120): (1.6, 6),
                 (1200, 10240): (1.85, 11.6),
+                (2400, 320): (3, 0.9),
                 (2400, 640): (3, 1.2),
                 (2400, 1280): (3, 2),
                 (2400, 4800): (2, 3.8),
@@ -393,5 +394,5 @@ def plot_all_fields_series(pat="*_0.bin", fmt="jpg", which="density"):
 
 
 if __name__ == "__main__":
-    pat = "4800_640_0.300_3.??0_1.0_2004_4_10000_0.1_0.bin"
-    plot_all_fields_series(pat, fmt="jpg", which="momentum")
+    pat = "2400_320_0.300_?.?94_1.0_4?01_4_10000_0.1_0.bin"
+    plot_all_fields_series(pat, which="momentum")
